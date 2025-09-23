@@ -11,11 +11,16 @@ Somewhere in the middle lies fertile land.
 #include <raylib.h>
 #include <vector>
 #include "GridCell.h"
-#include <stb_perlin.h>
 #include "MouseInput.h"
 
-#define GRID_SIZE_Y 300
-#define GRID_SIZE_X 300
+#define GRID_SIZE_Y 30
+#define GRID_SIZE_X 30
+#define TILE_WIDTH 64
+#define TILE_HEIGHT 32
+#define TILE_WIDTH_HALF 32
+#define TILE_HEIGHT_HALF 16
+
+
 class GridMap
 {
 public:
@@ -23,8 +28,24 @@ public:
 	{
 		ResetPerlinTexture();
 		ResetGridMapArray();
+		ResetIsoGridMapArray();
+		
+
 		//resize the grid because the grid might change in later itereations of the code. current there is no need for this
-	
+		PlainsTexture = LoadTexture("resources/textures/IsoPlains.png");
+		WaterTexture = LoadTexture("resources/textures/IsoWater.png");
+		MountainTexture = LoadTexture("resources/textures/IsoMountains.png");
+		SnowTexture = LoadTexture("resources/textures/IsoPeak.png");
+		Max_Height = LoadTexture("resources/textures/Max_Height.png");
+		IsoGridTexture[0] = WaterTexture;
+		IsoGridTexture[1] = PlainsTexture;
+		IsoGridTexture[2] = MountainTexture;
+		IsoGridTexture[3] = SnowTexture;
+
+
+
+		IsometricExportMap();
+		IsoMapTexture = LoadTexture("IsoMap.png");
 		
 	};
 
@@ -33,6 +54,9 @@ public:
 		UnloadImage(PerlinNoiseImage);
 		UnloadTexture(PerlinNoiseTexture);
 	};
+	void IsometricExportMap();
+	void ResetIsoGridMapArray();
+	void IsometricDrawMap();
 
 	void ResetPerlinTexture();
 	void ResetGridMapArray();
@@ -40,13 +64,25 @@ public:
 
 	void ExportMapTexture();
 
+	
+
 	void DrawMap(int tileWidth, int tileHeight,MouseInput& mouse);
-	void IsometricDrawMap(int tileWidth, int tileHeight, MouseInput& mouse);
+	//void IsometricDrawMap(int tileWidth, int tileHeight, MouseInput& mouse);
 	const Texture2D* GetPerlinTexture() const;
 
 
 private:
-	std::vector<GridCell> GridMapArray;;// 30 by 30 map of GridCells
+	
+	std::vector<GridCell> IsoGridMapArray;
+	Texture IsoGridTexture[4];
+	std::vector<GridCell> GridMapArray;// 30 by 30 map of GridCells
 	Image PerlinNoiseImage;
 	Texture PerlinNoiseTexture;
+
+	Texture PlainsTexture;
+	Texture WaterTexture;
+	Texture MountainTexture;
+	Texture SnowTexture;
+	Texture Max_Height;
+	Texture IsoMapTexture;
 };

@@ -30,9 +30,9 @@ struct GridCell
 private:
 	double Height = 0.0; 
 	double Temperature = 0.0;
+	int resources = 0;
 
 	bool isOccupied = false; // if the cell is occupied by a building or person
 	bool isDestroyed = false; // if the cell is destroyed by a disaster or something else. if true, the cell cannot be used until it is repaired.
 	bool isWater = false; // if the cell under water, it cannot be used for building or walking. only for boats and bridges.
- 
-};
+};  
