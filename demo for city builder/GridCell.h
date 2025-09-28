@@ -11,28 +11,24 @@ struct GridCell
 	{
 		Height = height;
 	}
+
+	GridCell(double height, int x_param, int y_param)//should accept a normalized height value between 0 and 1 from the perlin noisemap
+	{
+		Height = height;
+		x = x_param;
+		y = y_param;
+	}
+
 	// normal gridcells hold information about the terrian it is situated on, if it is being used by some building or person and etc
 	// public functions > getter and setter functions to be called when creating or changing the gridcell.
 
 
 	void setHeight(double height) { Height = height; }
 	double getHeight() const { return Height; }
-	void setTemperature(double temperature) { Temperature = temperature; }
-	double getTemperature() const { return Temperature; }
-	void setOccupied(bool occupied) { isOccupied = occupied; }
-	bool getOccupied() const { return isOccupied; }
-	void setDestroyed(bool destroyed) { isDestroyed = destroyed; }
-	bool getDestroyed() const { return isDestroyed; }
-	void setWater(bool water) { isWater = water; }
-	bool getWater() const { return isWater; }
+	
 
 
+	int x = 0, y = 0;
 private:
 	double Height = 0.0; 
-	double Temperature = 0.0;
-	int resources = 0;
-
-	bool isOccupied = false; // if the cell is occupied by a building or person
-	bool isDestroyed = false; // if the cell is destroyed by a disaster or something else. if true, the cell cannot be used until it is repaired.
-	bool isWater = false; // if the cell under water, it cannot be used for building or walking. only for boats and bridges.
 };  

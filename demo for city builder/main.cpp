@@ -5,8 +5,8 @@
 #include "CustomCell.h"
 int main()
 {
-    const int screenWidth = 2000;
-    const int screenHeight = 1500;
+    const int screenWidth = 2800;
+    const int screenHeight = 1400;
     InitWindow(screenWidth, screenHeight, "I.G.Y");
     SetTargetFPS(60);  
     srand(time(NULL));
@@ -14,13 +14,8 @@ int main()
     GridMap map;
     MouseInput mouse;
 
-    // Initial generation
-    map.ResetPerlinTexture();
-    map.ResetGridMapArray();
-    map.ResetIsoGridMapArray();
+	int index = 4; // index for changing perspective
 
- 
-    map.IsometricExportMap(); // generate initial map
 
     while (!WindowShouldClose()) 
     {
@@ -31,19 +26,23 @@ int main()
         if (IsKeyPressed(KEY_SPACE))
         {
             map.ResetPerlinTexture();
-            map.ResetGridMapArray();
             map.ResetIsoGridMapArray();
-            map.IsometricExportMap();
+            map.InitializeIsoView();
+            map.IsometricExportMap(1);
+            map.IsometricExportMap(2);
+            map.IsometricExportMap(3);
+            map.IsometricExportMap(4);
         }
-
+        if (IsKeyPressed(KEY_RIGHT)) index++;
+		if (IsKeyPressed(KEY_LEFT)) index--;
+        map.IsometricDrawMap(index);
         BeginDrawing();
         ClearBackground(RAYWHITE);
         
 
 
         DrawFPS(1800, 10);
-
-        map.IsometricDrawMap(); // draw the cached texture
+       
 
         EndDrawing();
     }

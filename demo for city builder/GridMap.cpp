@@ -4,166 +4,138 @@
 #include <vector>
 #include <raymath.h>
 #include <raylib.h>
-void GridMap::DrawMap(int tileWidth, int tileHeight, MouseInput& mouse)
+#include <string>
+
+
+void GridMap::rotatePoint90(float x, float y,float tx, float ty,int angleDeg,float& oX, float& oY)
 {
+	float dx = x - tx;
+	float dy = y - ty;
 
-	mouse.MouseDrag();
-	mouse.MouseScroll();
+	int rot = ((angleDeg % 360) + 360) % 360;
 
-	Math::vec2 pan = mouse.GetPan();
-	float zoom = mouse.GetZoom();
-
-	for (int y = 0; y < GRID_SIZE_Y; y++)
+	switch (rot)
 	{
-		for (int x = 0; x < GRID_SIZE_X; x++)
-		{             
-			double h = GridMapArray[y * GRID_SIZE_X + x].getHeight();
-			unsigned char r = 0, g = 0, b = 0;
-
-			if (h < 0.3) r = 0, g = 0, b = static_cast<unsigned char>(128 + 127 * (h / 0.3));
-			else if (h < 0.6) r = 0, g = static_cast<unsigned char>(128 + 127 * ((h - 0.3) / 0.3)), b = 0;
-			else if (h < 0.8) r = static_cast<unsigned char>(70 + 69 * ((h - 0.6) / 0.2)), g = 69, b = 19;
-			else r = 255, g = 255, b = 255;
-
-			Color color = { r, g, b, 255 };
-
-
-				float normalX = (x * tileWidth) * zoom + pan.x;
-				float normalY = (y * tileHeight) * zoom + pan.y;
-
-				DrawRectangleV({ normalX, normalY }, { tileWidth * zoom, tileHeight * zoom }, color);
-			
-				
-		}
+	case 0: 
+		oX = tx + dx;
+		oY = ty + dy;
+		break;
+	case 90:  
+		oX = tx - dy;
+		oY = ty + dx;
+		break;
+	case 180:
+		oX = tx - dx;
+		oY = ty - dy;
+		break;
+	case 270: 
+		oX = tx + dy;
+		oY = ty - dx;
+		break;
+	case 360:
+		oX = tx + dx;
+		oY = ty + dy;
+		break;
 	}
-
-}
-//void GridMap::IsometricDrawMap(int tileWidth, int tileHeight, MouseInput& mouse)
-//{
-//
-//	mouse.MouseDrag();
-//	mouse.MouseScroll();
-//
-//	Math::vec2 pan = mouse.GetPan();
-//	float zoom = mouse.GetZoom();
-//
-//	for (int y = 0; y < GRID_SIZE_Y; y++)
-//	{
-//		for (int x = 0; x < GRID_SIZE_X; x++)
-//		{
-//			double h = GridMapArray[y * GRID_SIZE_X + x].getHeight();
-//
-//			float fh = static_cast<float>(h);
-//
-//			unsigned char r = 0, g = 0, b = 0;
-//
-//			if (h < 0.3) r = 0, g = 0, b = static_cast<unsigned char>(128 + 127 * (h / 0.3));
-//			else if (h < 0.6) r = 0, g = static_cast<unsigned char>(128 + 127 * ((h - 0.3) / 0.3)), b = 0;
-//			else if (h < 0.8) r = static_cast<unsigned char>(70 + 69 * ((h - 0.6) / 0.2)), g = 69, b = 19;
-//			else r = 255, g = 255, b = 255;
-//
-//			Color color = { r, g, b, 255 };
-//
-//
-//				float isoX = (x - y) * (tileWidth / 2.0f) * zoom + pan.x;
-//				float isoY = (x + y) * (tileHeight / 2.0f) * zoom + pan.y;
-//				DrawRectangleV({ isoX , isoY },
-//					{ tileWidth * zoom, tileHeight * zoom }, color);
-//
-//
-//		}
-//	}
-//
-//}
-void GridMap::ExportMapTexture()
-{
-
-	float tileWidth = 10;
-	float tileHeight = 10;
-		
-	RenderTexture2D target = LoadRenderTexture(GRID_SIZE_X* tileWidth, GRID_SIZE_Y* tileHeight);
-	BeginTextureMode(target); 
-
-	for (int y = 0; y < GRID_SIZE_Y; y++)
-	{
-		for (int x = 0; x < GRID_SIZE_X; x++)
-		{
-			double h = GridMapArray[y * GRID_SIZE_X + x].getHeight();
-			unsigned char r = 0, g = 0, b = 0;
-
-			if (h < 0.3) r = 0, g = 0, b = static_cast<unsigned char>(128 + 127 * (h / 0.3));
-			else if (h < 0.6) r = 0, g = static_cast<unsigned char>(128 + 127 * ((h - 0.3) / 0.3)), b = 0;
-			else if (h < 0.8) r = static_cast<unsigned char>(70 + 69 * ((h - 0.6) / 0.2)), g = 69, b = 19;
-			else r = 255, g = 255, b = 255;
-
-			Color color = { r, g, b, 255 };
-
-
-		
-				float normalX = (x * tileWidth);
-				float normalY = (y * tileHeight);
-
-				DrawRectangleV({ normalX, normalY }, { tileWidth, tileHeight}, color);
-
-		}
-	}
-	EndTextureMode();
-	Image image = LoadImageFromTexture(target.texture);
-	
-	ExportImage(image, "CreatedMap.png");
 }
 
-void GridMap::IsometricExportMap()
+void GridMap::IsometricExportOriginalMap()
 {
 
-	int offsetupper = (int)IsoGridMapArray[0].getHeight();
+	int offsetupper = static_cast<int>(IsoGridMapArray[0].getHeight());
+	RenderTexture2D target = LoadRenderTexture(TILE_WIDTH * GRID_SIZE_X, TILE_HEIGHT * GRID_SIZE_Y + offsetupper + 225);
 
-	RenderTexture2D target = LoadRenderTexture(TILE_WIDTH* GRID_SIZE_X,TILE_HEIGHT*GRID_SIZE_Y+ offsetupper + 225);
 	BeginTextureMode(target);
-	
-	int originX = ((TILE_WIDTH/2)*GRID_SIZE_X) - TILE_WIDTH /2;
+
+	int originX = ((TILE_WIDTH / 2) * GRID_SIZE_X) - TILE_WIDTH / 2;
 	int originY = offsetupper;
-	int current_texture;
 
 	for (int sum = 0; sum < GRID_SIZE_X + GRID_SIZE_Y - 1; ++sum) {
+
 		for (int x = 0; x <= sum; ++x) {
-			
 			int y = sum - x;
 
-
 			if (x >= 0 && x < GRID_SIZE_X && y >= 0 && y < GRID_SIZE_Y) {
-
-
 				int screenX = originX + (x - y) * TILE_WIDTH_HALF;
 				int screenY = originY + (x + y) * TILE_HEIGHT_HALF;
 
-				
-
 				int count = y * GRID_SIZE_X + x;
-				GridCell currentCell = IsoGridMapArray[count];
-				double height = currentCell.getHeight();
+				double height = IsoGridMapArray[count].getHeight();
 
-				current_texture = 3;
-				if(height < 205) current_texture = 2;
+				int current_texture = 3;
+				if (height < 205) current_texture = 2;
 				if (height < 150) current_texture = 1;
-				if (height < 75) current_texture = 0;
+				if (height < 75)  current_texture = 0;
 
 				DrawTexture(IsoGridTexture[current_texture], screenX, screenY - height, WHITE);
-				DrawTexture(Max_Height, screenX, screenY- height, WHITE);
+				DrawTexture(Max_Height, screenX, screenY - height, WHITE);
 			}
 		}
 	}
 
+	EndTextureMode();
+	Image image = LoadImageFromTexture(target.texture);
+	ImageFlipVertical(&image);
+	
+	ExportImage(image, "original.png");
 
+
+}
+
+void GridMap::IsometricExportMap(int view)
+{
+	GridCell** selectedView = nullptr;
+	Texture2D* outputTexture = nullptr;
+	const char* filename = nullptr;
+
+	switch (view) {
+	case 1: selectedView = view1; outputTexture = &IsoMap1Texture; filename = "IsoMap1.png"; break;
+	case 2: selectedView = view2; outputTexture = &IsoMap2Texture; filename = "IsoMap2.png"; break;
+	case 3: selectedView = view3; outputTexture = &IsoMap3Texture; filename = "IsoMap3.png"; break;
+	case 4: selectedView = view4; outputTexture = &IsoMap4Texture; filename = "IsoMap4.png"; break;
+	default: return;
+	}
+
+	int offsetupper = static_cast<int>(selectedView[0]->getHeight());
+	RenderTexture2D target = LoadRenderTexture(TILE_WIDTH * GRID_SIZE_X, TILE_HEIGHT * GRID_SIZE_Y + offsetupper + 225);
+
+	BeginTextureMode(target);
+
+	int originX = ((TILE_WIDTH / 2) * GRID_SIZE_X) - TILE_WIDTH / 2;
+	int originY = offsetupper;
+
+	for (int sum = 0; sum < GRID_SIZE_X + GRID_SIZE_Y - 1; ++sum) {
+
+		for (int x = 0; x <= sum; ++x) {
+			int y = sum - x;
+
+			if (x >= 0 && x < GRID_SIZE_X && y >= 0 && y < GRID_SIZE_Y) {
+				int screenX = originX + (x - y) * TILE_WIDTH_HALF;
+				int screenY = originY + (x + y) * TILE_HEIGHT_HALF;
+
+				int count = y * GRID_SIZE_X + x;
+				double height = selectedView[count]->getHeight();
+
+				int current_texture = 3;
+				if (height < 205) current_texture = 2;
+				if (height < 150) current_texture = 1;
+				if (height < 75)  current_texture = 0;
+
+				DrawTexture(IsoGridTexture[current_texture], screenX, screenY-height, WHITE);
+				DrawTexture(Max_Height, screenX, screenY - height, WHITE);
+			}
+		}
+	}
 
 	EndTextureMode();
 	Image image = LoadImageFromTexture(target.texture);
 	ImageFlipVertical(&image);
-	IsoMapTexture = LoadTextureFromImage(image);
-	ExportImage(image, "IsoMap.png");
+	*outputTexture = LoadTextureFromImage(image);
+	ExportImage(image, filename);
 }
 
 
+//reads the x and y values and stores them in the array in such a way that you could simple walk down the array using count and draw then in the order of painters perspective
 void GridMap::ResetIsoGridMapArray()
 {
 
@@ -183,35 +155,139 @@ void GridMap::ResetIsoGridMapArray()
 
 			if (x < GRID_SIZE_X && y < GRID_SIZE_Y) {
 
-				int count = y * GRID_SIZE_X + x; // or however you want to index
+				int count = y * GRID_SIZE_X + x;
 
 				unsigned char Height = GetImageColor(PerlinNoiseImage, x, y).r;
 
-				IsoGridMapArray[count] = GridCell{ (double)Height };
+				IsoGridMapArray[count] = GridCell{ (double)Height,x,y };
 
+				std::cout << "(" << x << "," << y << ")" << " " << static_cast<int>(Height) << std::endl;
 			}
 
 		}
 
 	}
-	//for (int i = 0; i < IsoGridMapArray.size(); i++)
-	//{
-	//	std::cout << "(" << i << ") : " << IsoGridMapArray.at(i).getHeight() << " , ";
-
-	//	if (i % 10 == 0 && i != 0)
-	//		std::cout << std::endl;
-	//}
-	//std::cout << "//////////////////////DONE//////////////////////////////////" << std::endl;
 
 }
-
-void GridMap::IsometricDrawMap()
+// this should produce something very similar to reset iso grid 
+// read the values in count. -> push them onto the new array in correct positions so that painters perspective will be kept
+// the way to do this is to 1. get x/y value of count = 0
+//void GridMap::InitializeIsoView()
+//{
+//	int i = 0;
+//	float new_x = 0;
+//	float new_y = 0;
+//	int count = 0;
+//
+//	for (int sum = 0; sum < GRID_SIZE_X + GRID_SIZE_Y - 1; ++sum) {
+//		for (int x = 0; x <= sum; ++x) {
+//
+//			int y = sum - x;
+//			if (x >= 0 && x < GRID_SIZE_X && y >= 0 && y < GRID_SIZE_Y) {
+//				 
+//				new_x = x;
+//				new_y = y;
+//				count = (int)(new_y * GRID_SIZE_X + new_x);
+//				view1[count] = &IsoGridMapArray[i];
+//				//std::cout << "view 1 (" << x << "," << y << ")" << "translated to  " << "(" << view1[i]->x << ", " << view1[i]->y<< ")" << std::endl;
+//
+//				rotatePoint90(x, y, GRID_SIZE_X_HALF, GRID_SIZE_Y_HALF, 90, new_x, new_y);
+//				count = (int)new_y * GRID_SIZE_X + (int)new_x;
+//				view2[count] = &IsoGridMapArray[i];
+//				std::cout << "original (" << x << "," << y << ")" << "translated to  " << "(" << view2[count]->x << ", " << view2[count]->y << ") at " << count << std::endl;
+//
+//				rotatePoint90(x, y, GRID_SIZE_X_HALF, GRID_SIZE_Y_HALF, 180, new_x, new_y);
+//				count = (int)new_y * GRID_SIZE_X + (int)new_x;
+//				view3[count] = &IsoGridMapArray[i];
+//				//std::cout << "view 3 (" << x << "," << y << ")" << "translated to  " << "(" << view3[i]->x << ", " << view3[i]->y << ")" << std::endl;
+//
+//				rotatePoint90(x, y, GRID_SIZE_X_HALF, GRID_SIZE_Y_HALF, 270, new_x, new_y);
+//				count = (int)new_y * GRID_SIZE_X + (int)new_x;
+//				view4[count] = &IsoGridMapArray[i];
+//				//std::cout << "view 4 (" << x << "," << y << ")" << "translated to  " << "(" << view4[i]->x << ", " << view4[i]->y << ")" << std::endl;
+//
+//				i++;
+//			}
+//			
+//		}
+//	}
+//
+//
+//}
+void GridMap::InitializeIsoView() // chat gpt version, based on the version above, I dunno what I did wrong lol
 {
-	if (IsoMapTexture.id != 0)
-	{
-		DrawTexture(IsoMapTexture, 0, 0, WHITE);
+	float new_x = 0;
+	float new_y = 0;
+
+	for (int sum = 0; sum < GRID_SIZE_X + GRID_SIZE_Y - 1; ++sum) {
+		for (int x = 0; x <= sum; ++x) {
+			int y = sum - x;
+
+			if (x >= 0 && x < GRID_SIZE_X && y >= 0 && y < GRID_SIZE_Y) {
+
+				// row-major index of original cell
+				int baseIndex = y * GRID_SIZE_X + x;
+
+				// --- 0° view (original) ---
+				view1[baseIndex] = &IsoGridMapArray[baseIndex];
+
+				// --- 90° rotation ---
+				rotatePoint90(x, y, GRID_SIZE_X_HALF, GRID_SIZE_Y_HALF, 90, new_x, new_y);
+				int rotIndex90 = static_cast<int>(new_y) * GRID_SIZE_X + static_cast<int>(new_x);
+				if (rotIndex90 >= 0 && rotIndex90 < GRID_SIZE_X * GRID_SIZE_Y)
+					view2[rotIndex90] = &IsoGridMapArray[baseIndex];
+
+				// --- 180° rotation ---
+				rotatePoint90(x, y, GRID_SIZE_X_HALF, GRID_SIZE_Y_HALF, 180, new_x, new_y);
+				int rotIndex180 = static_cast<int>(new_y) * GRID_SIZE_X + static_cast<int>(new_x);
+				if (rotIndex180 >= 0 && rotIndex180 < GRID_SIZE_X * GRID_SIZE_Y)
+					view3[rotIndex180] = &IsoGridMapArray[baseIndex];
+
+				// --- 270° rotation ---
+				rotatePoint90(x, y, GRID_SIZE_X_HALF, GRID_SIZE_Y_HALF, 270, new_x, new_y);
+				int rotIndex270 = static_cast<int>(new_y) * GRID_SIZE_X + static_cast<int>(new_x);
+				if (rotIndex270 >= 0 && rotIndex270 < GRID_SIZE_X * GRID_SIZE_Y)
+					view4[rotIndex270] = &IsoGridMapArray[baseIndex];
+			}
+		}
 	}
 }
+
+
+void GridMap::IsometricDrawMap(int index)
+{
+	switch (index % 4)
+	{
+	case 0:
+		if (IsoMap1Texture.id != 0)
+		{
+			DrawTexture(IsoMap1Texture, 0, 0, WHITE);
+			std::cout << "drawing map 1" << std::endl;
+		}
+		break;
+	case 1:
+		if (IsoMap2Texture.id != 0)
+		{
+			DrawTexture(IsoMap2Texture, 0, 0, WHITE);
+		}
+		break;
+	case 2:
+		if (IsoMap3Texture.id != 0)
+		{
+			DrawTexture(IsoMap3Texture, 0, 0, WHITE);
+		}
+		break;
+	case 3:
+		if (IsoMap4Texture.id != 0)
+		{
+			DrawTexture(IsoMap4Texture, 0, 0, WHITE);
+		}
+		break;
+
+	}
+	
+}
+
 
 void GridMap::ResetPerlinTexture()
 {
@@ -225,63 +301,8 @@ void GridMap::ResetPerlinTexture()
 	ExportImage(PerlinNoiseImage, "PerlinNoise.png");
 
 }
-
-void GridMap::ResetGridMapArray()
-{
-
-
-	GridMapArray.resize(GRID_SIZE_X * GRID_SIZE_Y);
-
-	for (int y = 0; y < GRID_SIZE_Y; y++)
-		for (int x = 0; x < GRID_SIZE_X; x++)
-		{
-			unsigned char Height = GetImageColor(PerlinNoiseImage, y, x).r;
-			//double normalizedHeightValue = (double)Height / 255.0;
-			GridMapArray[y * GRID_SIZE_X + x] = GridCell{ (double)Height }; // initialize the GridMap Array by calling the constructor of the gridcell with random but coherent values. 
-		}
-
-	//for (int i = 0; i < GridMapArray.size(); i++)
-	//{
-	//	std::cout << "(" << i << ") : " << GridMapArray.at(i).getHeight() << " , ";
-
-	//	if (i % 10 == 0 && i!= 0)
-	//		std::cout << std::endl;
-	//}
-	//std::cout << "DONE" << std::endl;
-		
-}
-
-void GridMap::DrawPerlinTexture()
-{
-	// get mouse scroll to scale the texture
-	static float scale = 1.0f;
-	float scroll = GetMouseWheelMove(); // +1 or -1 per scroll tick
-	scale += scroll * 0.1f;             // adjust scaling speed
-	if (scale < 0.1f) scale = 0.1f;     // minimum scale
-	if (scale > 10.0f) scale = 10.0f;   // maximum scale
-
-	// original texture size
-	int texWidth = PerlinNoiseTexture.width;
-	int texHeight = PerlinNoiseTexture.height;
-
-	// calculate destination rectangle centered on screen
-	int screenWidth = GetScreenWidth();
-	int screenHeight = GetScreenHeight();
-
-	Rectangle destRec;
-	destRec.width = texWidth * scale;
-	destRec.height = texHeight * scale;
-	destRec.x = screenWidth / 2.0f - destRec.width / 2.0f;
-	destRec.y = screenHeight / 2.0f - destRec.height / 2.0f;
-
-	Rectangle sourceRec = { 0, 0, (float)texWidth, (float)texHeight };
-	Vector2 origin = { 0, 0 }; // top-left origin
-
-	DrawTexturePro(PerlinNoiseTexture, sourceRec, destRec, origin, 0.0f, WHITE);
-}
-
-
 const Texture2D* GridMap::GetPerlinTexture() const// so we dont copy the texture
 {
 	return &PerlinNoiseTexture;
 }
+
