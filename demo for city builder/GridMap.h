@@ -14,11 +14,11 @@ Somewhere in the middle lies fertile land.
 #include "MouseInput.h"
 
 
-#define GRID_SIZE_Y 31
-#define GRID_SIZE_X 31
+#define GRID_SIZE_Y 51
+#define GRID_SIZE_X 51
 
-#define GRID_SIZE_Y_HALF (15)
-#define GRID_SIZE_X_HALF (15)
+#define GRID_SIZE_Y_HALF (25)
+#define GRID_SIZE_X_HALF (25)
 
 #define TILE_WIDTH 64
 #define TILE_HEIGHT 32
@@ -60,10 +60,7 @@ public:
 		IsometricExportMap(4); // generate initial map
 		
 		
-		IsoMapTexture[0] = IsoMap1Texture;
-		IsoMapTexture[1] = IsoMap2Texture;
-		IsoMapTexture[2] = IsoMap3Texture;
-		IsoMapTexture[3] = IsoMap4Texture;
+
 
 
 		
