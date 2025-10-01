@@ -89,10 +89,10 @@ void GridMap::IsometricExportMap(int view)
 	const char* filename = nullptr;
 
 	switch (view) {
-	case 1: selectedView = view1; outputTexture = &IsoMap1Texture; filename = "IsoMap1.png"; break;
-	case 2: selectedView = view2; outputTexture = &IsoMap2Texture; filename = "IsoMap2.png"; break;
-	case 3: selectedView = view3; outputTexture = &IsoMap3Texture; filename = "IsoMap3.png"; break;
-	case 4: selectedView = view4; outputTexture = &IsoMap4Texture; filename = "IsoMap4.png"; break;
+	case 1: selectedView = view1; outputTexture = &IsoMap1Texture; break;
+	case 2: selectedView = view2; outputTexture = &IsoMap2Texture; break;
+	case 3: selectedView = view3; outputTexture = &IsoMap3Texture; break;
+	case 4: selectedView = view4; outputTexture = &IsoMap4Texture; break;
 	default: return;
 	}
 
@@ -130,8 +130,10 @@ void GridMap::IsometricExportMap(int view)
 	EndTextureMode();
 	Image image = LoadImageFromTexture(target.texture);
 	ImageFlipVertical(&image);
+	if (outputTexture->id != 0) {
+		UnloadTexture(*outputTexture);
+	}
 	*outputTexture = LoadTextureFromImage(image);
-	ExportImage(image, filename);
 }
 
 
@@ -161,7 +163,7 @@ void GridMap::ResetIsoGridMapArray()
 
 				IsoGridMapArray[count] = GridCell{ (double)Height,x,y };
 
-				std::cout << "(" << x << "," << y << ")" << " " << static_cast<int>(Height) << std::endl;
+				//std::cout << "(" << x << "," << y << ")" << " " << static_cast<int>(Height) << std::endl;
 			}
 
 		}
@@ -262,7 +264,7 @@ void GridMap::IsometricDrawMap(int index)
 		if (IsoMap1Texture.id != 0)
 		{
 			DrawTexture(IsoMap1Texture, 0, 0, WHITE);
-			std::cout << "drawing map 1" << std::endl;
+			
 		}
 		break;
 	case 1:
@@ -293,7 +295,7 @@ void GridMap::ResetPerlinTexture()
 {
 	int seedX = GetRandomValue(0, 10000);
 	int seedY = GetRandomValue(0, 10000);
-	std::cout << seedX << " ," << seedY << std::endl;
+	//std::cout << seedX << " ," << seedY << std::endl;
 	PerlinNoiseImage = GenImagePerlinNoise(GRID_SIZE_X, GRID_SIZE_Y, seedX, seedY, 1.0f);
 	PerlinNoiseTexture = LoadTextureFromImage(PerlinNoiseImage);
 

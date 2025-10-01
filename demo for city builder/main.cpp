@@ -8,7 +8,7 @@ int main()
     const int screenWidth = 2800;
     const int screenHeight = 1400;
     InitWindow(screenWidth, screenHeight, "I.G.Y");
-    SetTargetFPS(60);  
+    SetTargetFPS(540);  
     srand(time(NULL));
 
     GridMap map;
